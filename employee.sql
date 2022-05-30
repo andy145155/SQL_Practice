@@ -92,6 +92,7 @@ INSERT INTO employee VALUES(105, 'Stanley', 'Hudson', '1958-02-19', 'M', 69000, 
 INSERT INTO employee VALUES(106, 'Josh', 'Porter', '1969-09-05', 'M', 78000, 100, NULL);
 
 INSERT INTO branch VALUES(3, 'Stamford', 106, '1998-02-13');
+INSERT INTO branch VALUE(4, 'Buffalo', NULL, NULL);
 
 UPDATE employee
 SET branch_id = 3
@@ -130,7 +131,126 @@ INSERT INTO works_with VALUES(102, 406, 15000);
 INSERT INTO works_with VALUES(105, 406, 130000);
 
 ---SELECT DATA---
+SELECT * 
+FROM Employee;
+
+SELECT * 
+FROM Works_With;
+
+SELECT *
+FROM Employee
+ORDER BY sex, first_name, lsat_name DESC;
+
+SELECT first_name AS forename, lsat_name AS surname
+FROM Employee; 
+
+SELECT DISTINCT branch_id
+FROM Employee;
 
 
-SELECT * FROM Employee;
-SELECT * FROM Works_With;
+---FUNCITONS IN SQL---
+
+-- Find the number of female employees born after 1970
+SELECT COUNT(emp_id)
+FROM Employee
+WHERE sex = 'F' AND birth_date > '1971-01-01';
+
+-- Find the average of all employee's salaries 
+SELECT AVG(salary)
+FROM Employee
+WHERE sex = 'M';
+
+-- Find the sum of all employee's salaries 
+SELECT SUM(salary)
+FROM Employee;
+
+-- Find out how many males and females there are 
+SELECT COUNT(sex), sex
+FROM Employee
+GROUP BY sex;
+
+-- Find the total sales of each salesman
+SELECT emp_id, SUM(total_sales)
+FROM Works_With
+GROUP BY Works_With.emp_id;
+
+------Wildcards-----
+-- % = any # characters, _ = one character 
+
+-- Find any client's who are an LLC 
+SELECT * 
+FROM Client
+WHERE client_name LIKE '%LLC';
+
+-- Find any branch suppliers who are in the label business
+SELECT * 
+FROM Branch_Supplier
+WHERE supplier_name LIKE '% Labels%';
+
+-- Find any employee born in Feb
+SELECT * 
+FROM Employee
+WHERE birth_date LIKE '____-02%';
+
+-- Find any clients who are school
+SELECT * 
+FROM Client
+WHERE client_name LIKE '%school%';
+
+
+-- UNION(Remove duplicates)  UNION ALL(Keep duplicates)--
+-- Find a list of employee and branch name
+SELECT first_name AS name
+FROM Employee
+UNION
+SELECT branch_name
+FROM Branch;
+
+-- Find a list of all clients & branch supplier's names
+SELECT client_name, Client.branch_id
+FROM Client
+UNION 
+SELECT supplier_name, Branch_Supplier.branch_id
+FROM Branch_Supplier;
+
+-- Find a list of all money spent or earned by the company
+SELECT salary
+FROM Employee
+UNION 
+SELECT total_sales
+FROM Works_With;
+
+-- JOIN -- 
+-- Find all branches and the name of their managers 
+SELECT Employee.emp_id, Employee.first_name, Branch.branch_name
+FROM Employee
+JOIN Branch
+ON Employee.emp_id = Branch.mgr_id;
+
+SELECT Employee.emp_id, Employee.first_name, Branch.branch_name
+FROM Employee
+RIGHT JOIN Branch
+ON Employee.emp_id = Branch.mgr_id;
+
+-- Nested Queries ---
+
+-- Find names of all employees who have 
+-- sold over 30,000 to a single client
+SELECT Employee.first_name, Employee.lsat_namXWe
+FROM Employee
+WHERE Employee.emp_id IN (
+    SELECT Works_With.emp_id 
+    FROM Works_With
+    WHERE Works_With.total_sales > 30000
+);
+
+-- Find all clients who are handled by the branch
+-- that Michael Scott manages 
+-- Assume you know Michael's ID 
+SELECT *
+FROM Client
+WHERE CLIENT.branch_id IN (
+    SELECT Branch.branch_id
+    FROM Branch
+    WHERE Branch.mgr_id = 102
+);
